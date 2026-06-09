@@ -1,18 +1,14 @@
 import mongoose from "mongoose";
 
-// Global cache type definition
 type MongooseCache = {
   conn: mongoose.Connection | null;
   promise: Promise<mongoose.Connection> | null;
 };
 
-// Declare global variable for caching
 declare global {
-  // eslint-disable-next-line no-var
   var mongoose: MongooseCache;
 }
 
-// Initialize cache
 let cached = global.mongoose;
 
 if (!cached) {
@@ -26,7 +22,7 @@ export const connectDB = async () => {
 
   if (!cached.promise) {
     const opts = {
-      dbName: "TsToursAndTravels",
+      dbName: "RBAC-Task", 
       bufferCommands: false,
       maxPoolSize: 10,
     };
@@ -37,9 +33,9 @@ export const connectDB = async () => {
 
     cached.promise = mongoose
       .connect(process.env.MONGO_URI, opts)
-      .then((mongoose) => {
-        console.log("MongoDB connected successfully!");
-        return mongoose.connection;
+      .then((mongooseInstance) => {
+        console.log("MongoDB connected successfully to RBAC-Task database!");
+        return mongooseInstance.connection;
       });
   }
 

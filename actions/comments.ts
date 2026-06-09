@@ -52,8 +52,13 @@ export async function deleteComment(commentId: string, postId: string) {
     }
 
     if (role === "user") {
-        if (comment.author.toString() !== userId) {
-            throw new Error("You can only delete your own comments");
+        const Post = (await import("@/models/Post")).default;
+        const post = await Post.findById(comment.post);
+        const isCommentOwner = comment.author.toString() === userId;
+        const isPostOwner = post && post.author.toString() === userId;
+
+        if (!isCommentOwner && !isPostOwner) {
+            throw new Error("You can only delete your own comments or comments on your posts");
         }
     }
 
