@@ -34,8 +34,11 @@ export default async function PostsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 cursor-pointer">Community Feed</h1>
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-2.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300"></div>
+          <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">Community Feed</h1>
+        </div>
         {role !== "guest" && session && <CreatePostModal />}
       </div>
 
@@ -50,18 +53,19 @@ export default async function PostsPage() {
           return (
             <div
               key={post._id.toString()}
-              className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow flex flex-col"
+              className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] transition-all duration-300 group/card relative overflow-hidden"
             >
-              {/* ১. পোস্টের মূল বডি (Title & Content) */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500 transform scale-x-0 group-hover/card:scale-x-100 transition-transform origin-left duration-300"></div>
+
               <div className="flex justify-between items-start">
                 <Link
                   href={`/post/${post._id.toString()}`}
                   className="block group flex-1 mr-4"
                 >
-                  <h2 className="text-2xl font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                  <h2 className="text-2xl font-bold tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">
                     {post.title}
                   </h2>
-                  <p className="mt-2 text-gray-600 line-clamp-3 leading-relaxed">
+                  <p className="mt-3 text-slate-600 line-clamp-3 leading-relaxed text-[15px]">
                     {post.content}
                   </p>
                 </Link>
@@ -71,29 +75,34 @@ export default async function PostsPage() {
                 )}
               </div>
 
-              {/* ২. অথর ইনফো এবং ডেট (এখন কমেন্টের উপরে চলে এসেছে) */}
-              <div className="flex items-center gap-2 mt-4 text-sm text-gray-500 pb-4 border-b border-gray-100">
-                <div className="flex items-center gap-1 font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded">
-                  <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+              <div className="flex items-center gap-3 mt-5 text-sm text-slate-500 pb-5 border-b border-slate-100">
+                <div className="flex items-center gap-2 font-medium text-slate-800 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full">
+                  <div className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 text-xs font-bold">
+                    {post.author?.name[0]?.toUpperCase()}
+                  </div>
                   {post.author?.name}
                 </div>
                 <span>•</span>
                 <span>{new Date(post.createdAt).toLocaleDateString()}</span>
               </div>
 
-              {/* ৩. কমেন্ট সেকশন (কার্ডের একদম নিচে/সর্বশেষে) */}
-              <div className="mt-4">
+              <div className="mt-5">
                 {post.comments && post.comments.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">Recent Comments</h4>
-                    <div className="space-y-3">
+                  <div className="mb-5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.38-.494 2.651-2.072 3.869-2.072 3.869s1.884-.367 3.535-1.121A8.956 8.956 0 0012 20.25z" />
+                      </svg>
+                      Recent Activity
+                    </h4>
+                    <div className="space-y-3 border-l-2 border-indigo-100 pl-4 ml-2">
                       {post.comments.map((comment: any) => (
-                        <div key={comment._id.toString()} className="bg-gray-50 rounded-lg p-3 text-sm border border-gray-100">
-                          <div className="flex gap-2 items-center mb-1">
-                            <span className="font-semibold text-gray-900">{comment.author?.name}</span>
-                            <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                        <div key={comment._id.toString()} className="bg-slate-50/70 rounded-xl p-3.5 text-sm border border-slate-100">
+                          <div className="flex gap-2 items-center mb-1.5">
+                            <span className="font-bold text-slate-800">{comment.author?.name}</span>
+                            <span className="text-xs font-medium text-slate-400">{new Date(comment.createdAt).toLocaleDateString()}</span>
                           </div>
-                          <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                          <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
                         </div>
                       ))}
                     </div>

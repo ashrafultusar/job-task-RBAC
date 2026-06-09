@@ -34,7 +34,6 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Prevent body scroll when mobile sidebar is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -139,24 +138,18 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* ========================================================
-          SMOOTH SLIDING MOBILE SIDEBAR WITH ACTIVE LINKS
-         ======================================================== */}
+     
       <div className={`fixed inset-0 h-screen w-screen z-[9999] md:hidden transition-all duration-300 ${isOpen ? "visible pointer-events-auto" : "invisible pointer-events-none"}`}>
 
-        {/* Smooth Backdrop Fade */}
         <div
           onClick={() => setIsOpen(false)}
           className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ease-in-out ${isOpen ? "opacity-100" : "opacity-0"}`}
         />
 
-        {/* Smooth Sliding Panel */}
         <div className={`absolute top-0 right-0 h-full w-80 bg-white shadow-2xl flex flex-col justify-between border-l border-gray-100 transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
 
-          {/* Content Top Wrap */}
           <div className="p-6 flex flex-col gap-6 overflow-y-auto">
 
-            {/* Sidebar Header */}
             <div className="flex justify-between items-center pb-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-sm">R</div>
@@ -188,7 +181,6 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Navigation Section (Active Route Logic Applied Here) */}
             <div className="flex flex-col gap-1.5 mt-2">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-3 mb-1">Navigation</p>
 
@@ -207,7 +199,6 @@ export default function Navbar() {
                 Feed
               </Link>
 
-              {/* Admin Dashboard Link */}
               {role === "super_admin" && (
                 <Link
                   onClick={() => setIsOpen(false)}
@@ -226,7 +217,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Bottom Sticky Action Footer */}
           <div className="p-6 border-t border-gray-100 bg-slate-50/50">
             {session ? (
               <button

@@ -7,6 +7,31 @@ import { notFound } from "next/navigation";
 import CommentForm from "@/components/CommentForm";
 import DeleteActionButton from "@/components/DeleteActionButton";
 import Link from "next/link";
+import ReplyToggle from "@/components/ReplyToggle";
+import { Types } from "mongoose";
+
+interface PopulatedAuthor {
+  _id: Types.ObjectId;
+  name: string;
+  email: string;
+}
+
+interface LeanPostDoc {
+  _id: Types.ObjectId;
+  title: string;
+  content: string;
+  createdAt: Date | string;
+  author: PopulatedAuthor; 
+}
+
+interface LeanCommentDoc {
+  _id: Types.ObjectId;
+  post: Types.ObjectId;
+  content: string;
+  createdAt: Date | string;
+  author: PopulatedAuthor; 
+  parentComment?: Types.ObjectId;
+}
 
 export default async function PostDetailsPage({
   params,
@@ -21,33 +46,30 @@ export default async function PostDetailsPage({
   const role = session?.user?.role;
   const userId = session?.user?.id;
 
-  const rawPost = await Post.findById(id)
+  const post = await Post.findById(id)
     .populate({ path: "author", model: User, select: "name email" })
-    .lean();
+    .lean<LeanPostDoc | null>();
 
-  if (!rawPost) {
+  if (!post) {
     notFound();
   }
-
-  const post: any = rawPost;
 
   const comments = await Comment.find({ post: id })
     .populate({ path: "author", model: User, select: "name email" })
     .sort({ createdAt: 1 })
-    .lean();
+    .lean<LeanCommentDoc[]>();
 
   const isPostOwner = post.author._id.toString() === userId;
   const canDeletePost =
     role === "super_admin" || role === "moderator" || isPostOwner;
-  const canEditPost = role === "user" && isPostOwner;
   const isUpdatableByThisUser = isPostOwner;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       {/* Post Article */}
-      <article className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-8 relative">
-        <div className="flex justify-between items-start gap-4 mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+      <article className="bg-white p-8 lg:p-12 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 mb-8 relative">
+        <div className="flex justify-between items-start gap-4 mb-8">
+          <h1 className="text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
             {post.title}
           </h1>
           <div className="flex items-center gap-2">
@@ -78,14 +100,19 @@ export default async function PostDetailsPage({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-sm text-gray-600 mb-8 border-b pb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-              {(post.author as any).name[0]?.toUpperCase()}
+        <div className="flex items-center gap-3 text-sm text-slate-500 mb-10 pb-6 border-b border-slate-100">
+          <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 px-4 py-2 rounded-2xl">
+            <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold shadow-inner">
+              {post.author.name?.[0]?.toUpperCase() || "?"}
             </div>
-            <span className="font-semibold text-gray-800">
-              {(post.author as any).name}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                Written By
+              </span>
+              <span className="font-bold text-slate-800 text-sm leading-tight">
+                {post.author.name}
+              </span>
+            </div>
           </div>
           <span>•</span>
           <time dateTime={new Date(post.createdAt).toISOString()}>
@@ -93,7 +120,8 @@ export default async function PostDetailsPage({
               year: "numeric",
               month: "long",
               day: "numeric",
-            })}
+              }
+            )}
           </time>
         </div>
 
@@ -103,55 +131,123 @@ export default async function PostDetailsPage({
       </article>
 
       {/* Comments Section */}
-      <section className="bg-gray-50 rounded-2xl p-6 md:p-8">
-        <h3 className="text-2xl font-bold text-gray-900 mb-6">
-          Discussion ({comments.length})
+      <section className="bg-slate-50/50 rounded-3xl p-6 md:p-10 border border-slate-100 mb-10">
+        <h3 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-2">
+          Discussion
+          <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold">
+            {comments.length}
+          </span>
         </h3>
 
         <div className="space-y-6">
-          {comments.map((commentRaw: any) => {
-            const comment: any = commentRaw;
-            const isCommentOwner = comment.author._id.toString() === userId;
-            const canDeleteComment =
-              role === "super_admin" ||
-              role === "moderator" ||
-              isCommentOwner ||
-              isPostOwner;
+          {comments
+            .filter((c) => !c.parentComment)
+            .map((comment) => {
+              const isCommentOwner = comment.author._id.toString() === userId;
+              const canDeleteComment =
+                role === "super_admin" ||
+                role === "moderator" ||
+                isCommentOwner ||
+                isPostOwner;
 
-            return (
-              <div
-                key={comment._id.toString()}
-                className="flex gap-4 p-4 bg-white rounded-xl shadow-sm border border-gray-100"
-              >
-                <div className="w-8 h-8 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-700 font-bold text-xs mt-1">
-                  {comment.author.name[0]?.toUpperCase()}
-                </div>
-                <div className="flex-grow">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-semibold text-gray-900 text-sm">
-                      {comment.author.name}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </span>
+              const commentReplies = comments.filter(
+                (c) => c.parentComment?.toString() === comment._id.toString()
+              );
+
+              return (
+                <div
+                  key={comment._id.toString()}
+                  className="flex flex-col gap-3"
+                >
+                  <div className="flex gap-4 p-5 bg-white rounded-2xl shadow-sm border border-slate-100 group/comment transition-all hover:shadow-md">
+                    <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 font-black text-sm mt-0.5">
+                      {comment.author.name?.[0]?.toUpperCase() || "?"}
+                    </div>
+                    <div className="flex-grow">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-slate-900 text-[15px]">
+                          {comment.author.name}
+                        </span>
+                        <span className="text-xs font-medium text-slate-400">
+                          {new Date(comment.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-slate-600 leading-relaxed text-[15px] whitespace-pre-wrap">
+                        {comment.content}
+                      </p>
+
+                      {/* Inline Reply Form Toggle */}
+                      {role !== "guest" && session && (
+                        <ReplyToggle
+                          postId={post._id.toString()}
+                          parentCommentId={comment._id.toString()}
+                        />
+                      )}
+                    </div>
+
+                    {canDeleteComment && (
+                      <DeleteActionButton
+                        id={comment._id.toString()}
+                        postId={post._id.toString()}
+                        type="comment"
+                      />
+                    )}
                   </div>
-                  <p className="text-gray-700 text-sm whitespace-pre-wrap">
-                    {comment.content}
-                  </p>
+
+                  {/* Nested Replies Section */}
+                  {commentReplies.length > 0 && (
+                    <div className="ml-8 md:ml-14 space-y-3 mt-1">
+                      {commentReplies.map((reply) => {
+                        const isReplyOwner = reply.author._id.toString() === userId;
+                        const canDeleteReply =
+                          role === "super_admin" ||
+                          role === "moderator" ||
+                          isReplyOwner ||
+                          isPostOwner;
+
+                        return (
+                          <div
+                            key={reply._id.toString()}
+                            className="flex gap-4 p-4 bg-slate-50/80 rounded-2xl border border-slate-100 transition-all hover:shadow-sm relative"
+                          >
+                            <div className="absolute -left-6 md:-left-8 top-6 w-6 h-5 border-l-2 border-b-2 border-indigo-200 rounded-bl-xl origin-bottom"></div>
+
+                            <div className="w-8 h-8 rounded-full bg-white border border-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 font-black text-xs shadow-sm">
+                              {reply.author.name?.[0]?.toUpperCase() || "?"}
+                            </div>
+
+                            <div className="flex-grow">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="font-bold text-slate-800 text-sm">
+                                  {reply.author.name}
+                                </span>
+                                <span className="text-xs font-medium text-slate-400">
+                                  {new Date(reply.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <p className="text-slate-600 leading-relaxed text-[14px] whitespace-pre-wrap">
+                                {reply.content}
+                              </p>
+                            </div>
+
+                            {canDeleteReply && (
+                              <DeleteActionButton
+                                id={reply._id.toString()}
+                                postId={post._id.toString()}
+                                type="comment"
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-                {canDeleteComment && (
-                  <DeleteActionButton
-                    id={comment._id.toString()}
-                    postId={post._id.toString()}
-                    type="comment"
-                  />
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
 
           {comments.length === 0 && (
-            <p className="text-center text-gray-500 italic py-4">
+            <p className="text-center text-slate-500 font-medium py-10 bg-white shadow-sm rounded-2xl border border-slate-100 border-dashed">
               Be the first to share your thoughts!
             </p>
           )}

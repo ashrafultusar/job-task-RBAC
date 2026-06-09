@@ -18,12 +18,14 @@ export async function createComment(postId: string, formData: FormData) {
     }
 
     const content = formData.get("content") as string;
+    const parentCommentId = formData.get("parentCommentId") as string | null;
 
     await connectDB();
     await Comment.create({
         content,
         post: postId,
         author: session.user.id,
+        parentComment: parentCommentId || null,
     });
 
     revalidatePath(`/post/${postId}`);
@@ -64,6 +66,9 @@ export async function deleteComment(commentId: string, postId: string) {
 
     // Moderator and Super Admin bypass the ownership check
     await Comment.findByIdAndDelete(commentId);
+
+    // Cascade delete any nested replies
+    await Comment.deleteMany({ parentComment: commentId });
 
     revalidatePath(`/post/${postId}`);
     return { success: true };
