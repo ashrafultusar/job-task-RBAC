@@ -36,7 +36,7 @@ export default async function PostsPage() {
       {/* Header Section */}
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-2.5 rounded-full bg-indigo-600 shadow-sm shadow-indigo-300"></div>
+         
           <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">Community Feed</h1>
         </div>
         {role !== "guest" && session && <CreatePostModal />}
