@@ -59,4 +59,4 @@ The application strictly adheres to all provided task rules, both on the UI rend
    \`\`\`bash
    npm run dev
    \`\`\`
-5. Open [http://localhost:3000](http://localhost:3000) with your browser to experience the platform.
+5. Open [https://jobtaskrbac.vercel.app/posts](https://jobtaskrbac.vercel.app/posts) with your browser to experience the platform.
