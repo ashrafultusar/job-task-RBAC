@@ -33,7 +33,7 @@ export default function CreatePostForm({ onSuccess, onCancel }: { onSuccess?: ()
                     name="title"
                     required
                     placeholder="Give your post a catchy title..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-black focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
                 />
             </div>
 
@@ -43,7 +43,7 @@ export default function CreatePostForm({ onSuccess, onCancel }: { onSuccess?: ()
                     required
                     rows={4}
                     placeholder="Share your thoughts with the community..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-black  resize-none"
                 ></textarea>
             </div>
 

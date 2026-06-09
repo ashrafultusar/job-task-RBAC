@@ -4,7 +4,10 @@ import { auth } from "@/auth";
 import { notFound, redirect } from "next/navigation";
 import EditPostForm from "@/components/EditPostForm";
 
-export default async function EditPostPage({ params }: { params: { id: string } }) {
+export default async function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
+
     await connectDB();
     const session = await auth();
 
@@ -12,7 +15,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
         redirect("/login");
     }
 
-    const rawPost = await Post.findById(params.id).lean();
+    const rawPost = await Post.findById(id).lean();
 
     if (!rawPost) {
         notFound();

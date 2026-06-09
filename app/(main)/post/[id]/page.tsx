@@ -11,14 +11,17 @@ import Link from "next/link";
 export default async function PostDetailsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const resolvedParams = await params;
+  const id = resolvedParams.id;
+
   await connectDB();
   const session = await auth();
   const role = session?.user?.role;
   const userId = session?.user?.id;
 
-  const rawPost = await Post.findById(params.id)
+  const rawPost = await Post.findById(id)
     .populate({ path: "author", model: User, select: "name email" })
     .lean();
 
@@ -28,7 +31,7 @@ export default async function PostDetailsPage({
 
   const post: any = rawPost;
 
-  const comments = await Comment.find({ post: params.id })
+  const comments = await Comment.find({ post: id })
     .populate({ path: "author", model: User, select: "name email" })
     .sort({ createdAt: 1 })
     .lean();
