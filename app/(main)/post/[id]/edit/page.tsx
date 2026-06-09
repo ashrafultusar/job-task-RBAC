@@ -3,6 +3,14 @@ import { connectDB } from "@/db/dbConfig";
 import { auth } from "@/auth";
 import { notFound, redirect } from "next/navigation";
 import EditPostForm from "@/components/EditPostForm";
+import { Types } from "mongoose";
+
+interface LeanPostDoc {
+    _id: Types.ObjectId;
+    title: string;
+    content: string;
+    author: Types.ObjectId;
+}
 
 export default async function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params;
@@ -15,16 +23,12 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
         redirect("/login");
     }
 
-    const rawPost = await Post.findById(id).lean();
+    const post = await Post.findById(id).lean<LeanPostDoc>();
 
-    if (!rawPost) {
+    if (!post) {
         notFound();
     }
 
-    const post: any = rawPost;
-
-    // The strict role policy states only Owners can edit their own posts. 
-    // It does not explicitly mention Moderators editing. We will restrict it strictly to owners.
     if (post.author.toString() !== session.user.id) {
         redirect(`/post/${post._id.toString()}`);
     }
