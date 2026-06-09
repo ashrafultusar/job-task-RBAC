@@ -54,7 +54,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="text-xl font-black text-indigo-800 hover:text-indigo-600 transition-colors shrink-0 flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-base shadow-sm shadow-indigo-200">R</div>
+           
             RBAC Platform
           </Link>
 

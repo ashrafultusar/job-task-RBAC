@@ -12,7 +12,6 @@ export async function createPost(formData: FormData) {
     }
 
     const role = session.user.role;
-    // Guest cannot create posts
     if (role === "guest") {
         throw new Error("Guests are not allowed to create posts");
     }
@@ -27,7 +26,7 @@ export async function createPost(formData: FormData) {
         author: session.user.id,
     });
 
-    revalidatePath("/posts"); // Assuming /posts is the route
+    revalidatePath("/posts");
     return { success: true };
 }
 
@@ -40,7 +39,6 @@ export async function deletePost(postId: string) {
     const role = session.user.role;
     const userId = session.user.id;
 
-    // Guest cannot delete posts
     if (role === "guest") {
         throw new Error("Guests are not allowed to delete posts");
     }
@@ -52,15 +50,13 @@ export async function deletePost(postId: string) {
         throw new Error("Post not found");
     }
 
-    // Regular users can only delete their own posts
     if (role === "user") {
         if (post.author.toString() !== userId) {
             throw new Error("You can only delete your own posts");
         }
     }
 
-    // Moderators and Super Admins can delete any post 
-    // (the above condition handles the restriction for users)
+   
 
     await Post.findByIdAndDelete(postId);
     revalidatePath("/posts");
@@ -76,7 +72,6 @@ export async function updatePost(postId: string, formData: FormData) {
     const role = session.user.role;
     const userId = session.user.id;
 
-    // Guest cannot update posts
     if (role === "guest") {
         throw new Error("Guests are not allowed to update posts");
     }
@@ -88,10 +83,9 @@ export async function updatePost(postId: string, formData: FormData) {
         throw new Error("Post not found");
     }
 
-    // Even moderators cannot update other users' posts if we restrict it, 
-    // but let's say only the creator can update the post
+    
     if (post.author.toString() !== userId) {
-        // Typically, moderators only delete. Let's restrict update to Owner only
+       
         throw new Error("You can only update your own posts");
     }
 

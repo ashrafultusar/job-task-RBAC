@@ -13,7 +13,6 @@ export async function deleteUserActivity(targetUserId: string) {
 
     const role = session.user.role;
 
-    // Only super_admin can manage users
     if (role !== "super_admin") {
         throw new Error("Forbidden: Only Super Admin can delete users");
     }
@@ -25,9 +24,6 @@ export async function deleteUserActivity(targetUserId: string) {
         throw new Error("User not found");
     }
 
-    // Optionally delete all posts and comments by this user
-    // await Post.deleteMany({ author: targetUserId });
-    // await Comment.deleteMany({ author: targetUserId });
 
     await User.findByIdAndDelete(targetUserId);
     revalidatePath("/admin");

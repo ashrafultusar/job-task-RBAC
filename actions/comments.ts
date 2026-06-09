@@ -12,7 +12,6 @@ export async function createComment(postId: string, formData: FormData) {
     }
 
     const role = session.user.role;
-    // Guest cannot create comments
     if (role === "guest") {
         throw new Error("Guests are not allowed to create comments");
     }
@@ -41,7 +40,6 @@ export async function deleteComment(commentId: string, postId: string) {
     const role = session.user.role;
     const userId = session.user.id;
 
-    // Guest cannot delete comments
     if (role === "guest") {
         throw new Error("Guests are not allowed to delete comments");
     }
@@ -64,10 +62,9 @@ export async function deleteComment(commentId: string, postId: string) {
         }
     }
 
-    // Moderator and Super Admin bypass the ownership check
+   
     await Comment.findByIdAndDelete(commentId);
 
-    // Cascade delete any nested replies
     await Comment.deleteMany({ parentComment: commentId });
 
     revalidatePath(`/post/${postId}`);
