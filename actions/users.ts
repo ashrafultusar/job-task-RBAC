@@ -30,6 +30,6 @@ export async function deleteUserActivity(targetUserId: string) {
     // await Comment.deleteMany({ author: targetUserId });
 
     await User.findByIdAndDelete(targetUserId);
-    revalidatePath("/users");
+    revalidatePath("/admin");
     return { success: true };
 }

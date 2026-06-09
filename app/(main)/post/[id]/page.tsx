@@ -80,7 +80,7 @@ export default async function PostDetailsPage({
 
         <div className="flex items-center gap-3 text-sm text-gray-600 mb-8 border-b pb-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
+            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
               {(post.author as any).name[0]?.toUpperCase()}
             </div>
             <span className="font-semibold text-gray-800">

@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import Navbar from "@/components/Navbar";
+import { Providers } from "@/components/Providers";
 
 export default function RootLayout({
   children,
@@ -30,8 +31,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Navbar />
-        <main className="flex-grow bg-gray-50">{children}</main>
+        <Providers>
+          <Navbar />
+          <main className="flex-grow bg-gray-50">{children}</main>
+        </Providers>
       </body>
     </html>
   );
