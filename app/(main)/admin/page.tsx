@@ -3,16 +3,28 @@ import { connectDB } from "@/db/dbConfig";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import DeleteActionButton from "@/components/DeleteActionButton";
+import { Types } from "mongoose";
+
+interface LeanUserDoc {
+    _id: Types.ObjectId;
+    name: string;
+    email: string;
+    role: string;
+    createdAt: Date | string;
+}
 
 export default async function UsersManagementPage() {
     const session = await auth();
 
-    if (!session || session.user.role !== "super_admin") {
+    if (!session?.user || session.user.role !== "super_admin") {
         redirect("/posts");
     }
 
     await connectDB();
-    const users = await User.find().sort({ createdAt: -1 }).lean();
+    
+    const users = await User.find()
+        .sort({ createdAt: -1 })
+        .lean<LeanUserDoc[]>();
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -31,14 +43,15 @@ export default async function UsersManagementPage() {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {users.map((userRaw: any) => {
-                            const user: any = userRaw;
+                        {users.map((user) => {
+                            const userIdStr = user._id.toString();
+                            
                             return (
-                                <tr key={user._id.toString()}>
+                                <tr key={userIdStr}>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
                                             <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-                                                {user.name[0]?.toUpperCase()}
+                                                {user.name?.[0]?.toUpperCase() || "?"}
                                             </div>
                                             <div className="ml-4">
                                                 <div className="text-sm font-medium text-gray-900">{user.name}</div>
@@ -55,8 +68,8 @@ export default async function UsersManagementPage() {
                                         {new Date(user.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        {user._id.toString() !== session.user.id && (
-                                            <DeleteActionButton id={user._id.toString()} type="user" />
+                                        {userIdStr !== session.user.id && (
+                                            <DeleteActionButton id={userIdStr} type="user" />
                                         )}
                                     </td>
                                 </tr>
